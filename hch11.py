@@ -828,13 +828,18 @@ def backupResp():
 def backupInfo():
     """ Save backup of subject information.
     """
+    
+    slistfileBU = "bu/responseBackup/hch11_subjectList_bu.tsv"    
+    
+    # if subjectList file doesn't exist, create and print headers; else open and append at the end
+    if os.path.isfile(slistfileBU) == 0:
+        slistBU = open(slistfileBU, 'a')
+        print('date', 'phase', 'stimuliSet', 'chain', 'subjectID', 'keyPermutation', 'name', 'email', 'birthYear', 'gender', 'lefthanded', 'nativeLanguages', 'otherLanguages', 'musicInstruction', 'musicPractice', sep = '\t', file = slistBU)
+    else:
+        slistBU = open(slistfileBU, 'a')
 
-    slistfileBU = "bu/responseBackup/hch11_subjectList_bu.tsv"
-    slistBU = open(slistfileBU, 'a')
     print(sinfotxt, sep = '\t', file = slistBU)    
     slistBU.close()
-    
-    return
 
 def main():
     global FPSCLOCK, DISPLAYSTRF, sounds, instrFont, screenRect
@@ -871,8 +876,8 @@ def main():
     training2()
     block1()
     block2()
-    backupInfo()
     backupResp()
+    backupInfo()
     endExp()
 
 if __name__ == '__main__':
