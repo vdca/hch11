@@ -255,7 +255,7 @@ def stimulidef():
     lab_coda1 = ['ta', 'tan', 'ti', 'tin']
     lab_onset1 = ['di', 'ka', 'ni', 'ta']
     lab_onset2 = ['ka', 'ki', 'ta', 'ti']
-    lab_3dim1 = ['ki', 'ta', 'tin']
+    lab_3dim1 = ['ki', 'ta', 'tin']            # Chosen set
     lab_3dim2 = ['ka', 'tan', 'ti']
     stim_labels = [lab_coda1, lab_onset1, lab_onset2, lab_3dim1, lab_3dim2]
     
