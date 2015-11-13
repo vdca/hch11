@@ -18,7 +18,7 @@ import csv, glob, contextlib, wave, re
 #-------------------------------------------------------
 
 # directory containing the script
-# wd = expanduser("~/Dropbox/lana/MCK/esperimentuak/hch11_py/")
+# wd = expanduser("~/Dropbox/lana/MCK/esperimentuak/hch11/")
 wd = os.getcwd()
 os.chdir(wd)
 
@@ -46,7 +46,8 @@ bgColor      = LIGHTGRAY
 col1 = 1
 col2 = 2
 col3 = 3
-possibs = [col1, col2, col3]
+col4 = 4
+possibs = [col1, col2, col3, col4]
 
 #-------------------------------------------------------
 # Functions
@@ -220,8 +221,9 @@ def stimulidef():
     global stimulidir, stimtxt, stimwav, keypermutation, syllableSet
     
     # define key-sound mapping based on subject number.
-    # with 3 keys (3 sounds), 6 permutations are possible.
-    keypermutationList = list(permutations([0,1,2]))
+    # n! permutations
+    # with 3 keys (3 sounds), 6 permutations are possible; with 4 keys, 24.
+    keypermutationList = list(permutations([0,1,2,3]))
     # each subject sets a unique random generator
     keypermutation = list(random.sample(keypermutationList, 1)[0])
     # assign a different permutation to each of the first 6 subjects,
@@ -230,16 +232,14 @@ def stimulidef():
     # keymap = snumber2 - 6*(snumber2//6)
     # keypermutation = list(keypermutationList[keymap])
     
-    # new stimuli here!
-    # directory to read stimuli from
-    dir_coda1 = "stimuli/nld_coda1/"
-    dir_onset1 = "stimuli/nld_onset1/"
-    dir_onset2 = "stimuli/nld_onset2/"
-    dir_3dim1 = "stimuli/nld_3dim1/"
-    dir_3dim2 = "stimuli/nld_3dim2/"
-    stim_dirs = [dir_coda1, dir_onset1, dir_onset2, dir_3dim1, dir_3dim2]
+    # directory to read stimuli from    
+    stim_dirs = []
+    for (dirname, dirs, files) in os.walk("stimuli/"):
+        stim_dirs.append(dirname)
+    stim_dirs = sorted(stim_dirs)
+    stim_dirs = stim_dirs[1:]
     
-    stimulidir = stim_dirs[stim_set]
+    stimulidir = stim_dirs[stim_set] + "/"
     
     # get list of sound stimuli
     stimwav = []
@@ -252,12 +252,16 @@ def stimulidef():
     
     # new stimuli here!
     # set text cues to visualise sound stimuli
-    lab_coda1 = ['ta', 'tan', 'ti', 'tin']
-    lab_onset1 = ['di', 'ka', 'ni', 'ta']
-    lab_onset2 = ['ka', 'ki', 'ta', 'ti']
-    lab_3dim1 = ['ki', 'ta', 'tin']            # Chosen set
-    lab_3dim2 = ['ka', 'tan', 'ti']
-    stim_labels = [lab_coda1, lab_onset1, lab_onset2, lab_3dim1, lab_3dim2]
+    stim_labels = [
+    ['1', '2', '3', '4'],
+    ['ta', 'tan', 'ti', 'tin'],
+    ['di', 'ka', 'ni', 'ta'],
+    ['ka', 'ki', 'ta', 'ti'],
+    ['ki', 'ta', 'tin'],            # Chosen set for pilot 1
+    ['ka', 'tan', 'ti'],
+    ['ban', 'bi', 'ta', 'tin'],
+    ['ban', 'bi', 'ta', 'tin']
+    ]
     
     stimtxt = stim_labels[stim_set]
     stimtxt = sorted(stimtxt)
@@ -326,7 +330,7 @@ def stimfiles():
             trialList.append(map(int, trials[i][4]))
 
     # read training sequences
-    trainingFile = responsedir1 + 'hch11_training.txt'    
+    trainingFile = responsedir1 + 'hch11_training4.txt'    
     with open(trainingFile) as f:
         trainSeq = f.read().splitlines()
 
@@ -358,12 +362,12 @@ def questions1():
     global phase, stim_set, refsubj, chain
     
     phase = raw_input("\n\nPhase of experiment (test, pilot, chains): ")
-    # stim_set = int(raw_input("Set of stimuli (3 = ki-tin-ta; 4 = ka-ti-tan): "))
+    stim_set = int(raw_input("Set of stimuli (0 = nonvocal; 6 = vocal): "))
     chain = raw_input("Diffusion chain number: ")
     refsubj = raw_input("Reference subject (leave empty if reference subject is previous subject): ")
     
     # phase = 'pilot'
-    stim_set = 3
+    # stim_set = 0
     # chain = '1'
     # refsubj = '0'    
     
@@ -448,7 +452,7 @@ def training1():
             
             "There are three types of syllables, [" +
             syllableSet + "], " +
-            "which match the [left, down, right] arrow keys.",
+            "which match the [left, down, right, up] arrow keys.",
 
             "In the next screen, you can test the keys and check "+
             "whether you can hear the syllables alright.",
@@ -481,6 +485,8 @@ def training1():
                     clickedButton = col2
                 if event.key == K_RIGHT:
                     clickedButton = col3
+                if event.key == K_UP:
+                    clickedButton = col4
                 if event.key == K_ESCAPE:
                     terminate()
                 if event.key == K_SPACE:
@@ -517,7 +523,7 @@ def training2():
                   
                   "Please listen carefully while the computer plays the sequence of syllables. " +
                   "Once the sequence has ended, a microphone will show on the screen. " +
-                  "You can then enter the sequence using the [left, down, right] arrow keys. " +
+                  "You can then enter the sequence using the [left, down, right, up] arrow keys. " +
                   "Remember that they match the syllables " +
                   "[" + syllableSet + "]. ",
 
@@ -592,6 +598,8 @@ def handleEvents():
                 clickedButton = col2
             if event.key == K_RIGHT:
                 clickedButton = col3
+            if event.key == K_UP:
+                clickedButton = col4
             if event.key == K_ESCAPE:
                 terminate()
             if event.key == K_SPACE:
@@ -630,6 +638,8 @@ def playtrain(stimuli):
                     clickedButton = col2
                 if event.key == K_RIGHT:
                     clickedButton = col3
+                if event.key == K_UP:
+                    clickedButton = col4                    
                 if event.key == K_ESCAPE:
                     terminate()
                 if event.key == K_r:
@@ -731,6 +741,8 @@ def playgame(stimuli):
                     clickedButton = col2
                 if event.key == K_RIGHT:
                     clickedButton = col3
+                if event.key == K_UP:
+                    clickedButton = col4                    
                 if event.key == K_ESCAPE:
                     terminate()
                 if event.key == K_r: # replay the current sequence
@@ -772,7 +784,7 @@ def playgame(stimuli):
                       file = sfileOUT, sep = ",")
                       
             # if entered sequence is too short, ask sequence at random later point    
-            elif (5 > currentStep > 0 and time.time() - TIMEOUT > lastClickTime):
+            elif (7 > currentStep > 0 and time.time() - TIMEOUT > lastClickTime):
                 levdist = None
                 print(chain, snumber, block, inpattern, outpattern, levdist,
                       file = sfileINOUT, sep = ",")
