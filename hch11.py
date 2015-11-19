@@ -449,9 +449,51 @@ def questions2():
     # collapse list into string
     sinfotxt = '\t'.join(sinfotxt)
     
-    #print(testdate, phase, stim_set, chain, snumber, str(keypermutation), sname, semail, syear,
-    #      sgender, shand, snative, sother,
-    #      smusic, smusic2, sep = '\t', file = slist)
+    print(sinfotxt, sep = '\t', file = slist)
+    
+    slist.close()
+    
+    return
+
+def questions3():
+    """ Ask the subject some background questions.
+    """
+    global testdate, sinfotxt
+
+    slistfile = "hch11_subjectFeedback.tsv"
+        
+    # if subjectList file doesn't exist, create and print headers; else open and append at the end
+    if os.path.isfile(slistfile) == 0:
+        slist = open(slistfile, 'a')
+        print('date', 'phase', 'stimuliSet', 'chain', 'subjectID', 'keyPermutation',
+        'challenge', 'fun', 'motifs', 'strategies', 'comments', sep = '\t', file = slist)
+    else:
+        slist = open(slistfile, 'a')
+    
+    print("\n\n" +
+    "Answering some (5) feedback questions would be very helpful." +
+    "\n\n")
+    
+    testdate = time.strftime("%Y%m%d_%H%M")
+    
+    schallenge = raw_input ("How challenging did you find the task? From 1 (very easy) to 4 (very hard): ")
+    sfun = raw_input ("Using the same scale; how much fun did you have? ")
+    smotifs = raw_input ("Is there any short combination of syllables which you felt appeared particularly often? ")
+    strategies = raw_input ("Did you follow any specific strategy to remember the sequences? ")
+    scomments = raw_input("Any further comments? ")
+    
+    print("\n\n" +
+    "--- End of the experiment ---" +
+    "\n\n")
+    
+    subjectInfo = [testdate, phase, stim_set, chain, snumber, stimlabels2,
+                   schallenge, sfun, smotifs, strategies, scomments]
+    # convert each element to a string
+    sinfotxt = []
+    for i in subjectInfo: sinfotxt.append(str(i))
+    # collapse list into string
+    sinfotxt = '\t'.join(sinfotxt)
+    
     print(sinfotxt, sep = '\t', file = slist)
     
     slist.close()
@@ -591,6 +633,8 @@ def endExp():
     "Thank you very much for your help."]
     
     instr()
+    
+    pygame.quit()
 
 def playtrain(stimuli):
     """ Subject is asked to reproduce patterns.
@@ -841,6 +885,7 @@ def main():
     backupResp()
     backupInfo()
     endExp()
+    questions3()
 
 if __name__ == '__main__':
     main()
