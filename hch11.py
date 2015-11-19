@@ -42,13 +42,6 @@ LIGHTGRAY    = (150, 150, 150)
 MIDGRAY      = (100, 100, 100)
 bgColor      = LIGHTGRAY
 
-# Set of button i/o possible buttons
-col1 = 1
-col2 = 2
-col3 = 3
-col4 = 4
-possibs = [col1, col2, col3, col4]
-
 #-------------------------------------------------------
 # Functions
 #-------------------------------------------------------
@@ -213,24 +206,63 @@ def drawRec():
     iconRect = recIcon.get_rect()
     DISPLAYSTRF.blit(recIcon,(screenRect.width/2 - iconRect.width/2, screenRect.height/2 - iconRect.height/2))
     pygame.display.flip()
+    
+def symbset():
+    """ set of possible symbols, and subject-specific key-symbol mapping
+    """
+    global possibs, keypermutation
+    
+    # Set of symbols 
+    symb1 = 1
+    symb2 = 2
+    symb3 = 3
+    symb4 = 4
+    possibs = [symb1, symb2, symb3, symb4]
+    
+    # define key-sound mapping based on subject number.
+    # n! permutations
+    # with 3 keys (3 sounds), 6 permutations are possible; with 4 keys, 24.
+    keypermutationList = list(permutations(list(range(0, len(possibs)))))
+    # each subject sets a unique random generator
+    keypermutation = list(random.sample(keypermutationList, 1)[0])
+    # reorder symbol set
+    possibs = [possibs[i] for i in keypermutation]
+
+def handleEvents():
+    """ handle events entered by user.
+    """
+    global clickedButton, stayHere, waitingForInput, exitfunc
+    
+    exitfunc = 0
+    
+    clickedButton = None
+    for event in pygame.event.get(): # event handling loop
+        if event.type == KEYDOWN:
+            if event.key == K_LEFT or event.key == K_7:
+                clickedButton = possibs[0]
+            if event.key == K_DOWN or event.key == K_8:
+                clickedButton = possibs[1]
+            if event.key == K_RIGHT or event.key == K_9:
+                clickedButton = possibs[2]
+            if event.key == K_UP or event.key == K_0:
+                clickedButton = possibs[3]
+            if event.key == K_ESCAPE:
+                terminate()
+            if event.key == K_r: # replay the current sequence
+                waitingForInput = False
+            if event.key == K_SPACE:
+                print(chain, snumber, block, inpattern, outpattern, levdist,
+                  file = sfileINOUT, sep = ",")
+                clean(bgColor)
+                stayHere = 0
+                exitfunc = 1
+                return
 
 def stimulidef():
     """ Define stimuli files, corresponding labels,
     and stimulus-to-key mapping.
     """    
-    global stimulidir, stimtxt, stimwav, keypermutation, syllableSet
-    
-    # define key-sound mapping based on subject number.
-    # n! permutations
-    # with 3 keys (3 sounds), 6 permutations are possible; with 4 keys, 24.
-    keypermutationList = list(permutations([0,1,2,3]))
-    # each subject sets a unique random generator
-    keypermutation = list(random.sample(keypermutationList, 1)[0])
-    # assign a different permutation to each of the first 6 subjects,
-    # then restart the series
-    # snumber2 = int(snumber)-1
-    # keymap = snumber2 - 6*(snumber2//6)
-    # keypermutation = list(keypermutationList[keymap])
+    global stimulidir, stimwav, stimlabels2, inputkeys
     
     # directory to read stimuli from    
     stim_dirs = []
@@ -241,32 +273,23 @@ def stimulidef():
     
     stimulidir = stim_dirs[stim_set] + "/"
     
-    # get list of sound stimuli
+    # get list of sound stimuli and corresponding labels
     stimwav = []
+    stimlabels1 = []
     for (dirname, dirs, files) in os.walk(stimulidir):
         for f in files:
             if f.endswith('.wav'):
                 stimwav.append(f)
+                stimlabels1.append(f.split('.')[0])
     stimwav = sorted(stimwav)
-    stimwav = [ stimwav[i] for i in keypermutation]
+    stimlabels1 = sorted(stimlabels1)
     
-    # new stimuli here!
-    # set text cues to visualise sound stimuli
-    stim_labels = [
-    ['1', '2', '3', '4'],
-    ['ta', 'tan', 'ti', 'tin'],
-    ['di', 'ka', 'ni', 'ta'],
-    ['ka', 'ki', 'ta', 'ti'],
-    ['ki', 'ta', 'tin'],            # Chosen set for pilot 1
-    ['ka', 'tan', 'ti'],
-    ['ban', 'bi', 'ta', 'tin'],
-    ['ban', 'bi', 'ta', 'tin']
-    ]
+    # stimuli labels with subject-specific random re-ordering
+    stimlabels2 = [stimlabels1[i] for i in keypermutation]
+    stimlabels2 = ', '.join(stimlabels2)
     
-    stimtxt = stim_labels[stim_set]
-    stimtxt = sorted(stimtxt)
-    stimtxt = [ stimtxt[i] for i in keypermutation]
-    syllableSet = ', '.join(stimtxt)
+    # list of input keys
+    inputkeys = '7, 8, 9, 0'
 
 def getrefsubj():
     """ Suject-related operations.
@@ -366,6 +389,7 @@ def questions1():
     chain = raw_input("Diffusion chain number: ")
     refsubj = raw_input("Reference subject (leave empty if reference subject is previous subject): ")
     
+    # defaults
     # phase = 'pilot'
     # stim_set = 0
     # chain = '1'
@@ -416,7 +440,7 @@ def questions2():
         smusic = raw_input("How many years of music instruction have you had? ")
         smusic2 = raw_input("How many hours per week do you sing, play an instrument or dance? ")
     
-    subjectInfo = [testdate, phase, stim_set, chain, snumber, syllableSet, sname, semail, syear,
+    subjectInfo = [testdate, phase, stim_set, chain, snumber, stimlabels2, sname, semail, syear,
           sgender, shand, snative, sother,
           smusic, smusic2]
     # convert each element to a string
@@ -450,9 +474,9 @@ def training1():
             "of syllables " +
             "and try to reproduce them using the keyboard.",
             
-            "There are three types of syllables, [" +
-            syllableSet + "], " +
-            "which match the [left, down, right, up] arrow keys.",
+            "There are four types of syllables, [" +
+            stimlabels2 + "], " +
+            "which match the <" + inputkeys + "> keys.",
 
             "In the next screen, you can test the keys and check "+
             "whether you can hear the syllables alright.",
@@ -476,26 +500,11 @@ def training1():
         
         drawRec()
         
-        clickedButton = None
-        for event in pygame.event.get(): # event handling loop
-            if event.type == KEYDOWN:
-                if event.key == K_LEFT:
-                    clickedButton = col1
-                if event.key == K_DOWN:
-                    clickedButton = col2
-                if event.key == K_RIGHT:
-                    clickedButton = col3
-                if event.key == K_UP:
-                    clickedButton = col4
-                if event.key == K_ESCAPE:
-                    terminate()
-                if event.key == K_SPACE:
-                    print(chain, snumber, block, inpattern, outpattern, levdist,
-                      file = sfileINOUT, sep = ",")
-                    clean(bgColor)
-                    stayHere = 0
-                    return
-                
+        handleEvents()
+
+        if exitfunc == 1:
+            return
+        
         # wait for the player to enter buttons
         if (clickedButton):
             sounds[clickedButton-1].play()
@@ -523,9 +532,9 @@ def training2():
                   
                   "Please listen carefully while the computer plays the sequence of syllables. " +
                   "Once the sequence has ended, a microphone will show on the screen. " +
-                  "You can then enter the sequence using the [left, down, right, up] arrow keys. " +
+                  "You can then enter the sequence using the <" + inputkeys + "> keys. " +
                   "Remember that they match the syllables " +
-                  "[" + syllableSet + "]. ",
+                  "[" + stimlabels2 + "]. ",
 
                   "Since this is a training session, if the wrong key is pressed, you will receive a warning " +
                   "and will have to reproduce the sequence from the beginning. " +
@@ -557,7 +566,7 @@ def block1():
     "Once you have entered a sequence, " +
     "just wait for a couple of seconds; a score will appear on the screen and the next sequence will be reproduced.",
     
-    "Reminder: the order of the syllables is [" + syllableSet + "].",
+    "Reminder: the order of the syllables is [" + stimlabels2 + "].",
     
     "To start, please press the spacebar."]
     
@@ -584,36 +593,11 @@ def endExp():
     
     instr()
 
-def handleEvents():
-    """ handle events entered by user.
-    """
-    global clickedButton, stayHere
-    
-    clickedButton = None
-    for event in pygame.event.get(): # event handling loop
-        if event.type == KEYDOWN:
-            if event.key == K_LEFT:
-                clickedButton = col1
-            if event.key == K_DOWN:
-                clickedButton = col2
-            if event.key == K_RIGHT:
-                clickedButton = col3
-            if event.key == K_UP:
-                clickedButton = col4
-            if event.key == K_ESCAPE:
-                terminate()
-            if event.key == K_SPACE:
-                print(chain, snumber, block, inpattern, outpattern, levdist,
-                  file = sfileINOUT, sep = ",")
-                clean(bgColor)
-                stayHere = 0
-                return
-
 def playtrain(stimuli):
     """ Subject is asked to reproduce patterns.
     Do not present new pattern until current one correctly answered.
     """
-    global FPSCLOCK, levdist, patternum, stayHere
+    global FPSCLOCK, levdist, patternum, stayHere, waitingForInput
     
     instr()
     
@@ -629,27 +613,10 @@ def playtrain(stimuli):
 
     while patternum < len(stimuli): # main game loop
     
-        clickedButton = None
-        for event in pygame.event.get(): # event handling loop
-            if event.type == KEYDOWN:
-                if event.key == K_LEFT:
-                    clickedButton = col1
-                if event.key == K_DOWN:
-                    clickedButton = col2
-                if event.key == K_RIGHT:
-                    clickedButton = col3
-                if event.key == K_UP:
-                    clickedButton = col4                    
-                if event.key == K_ESCAPE:
-                    terminate()
-                if event.key == K_r:
-                    waitingForInput = False
-                if event.key == K_SPACE:
-                    print(chain, snumber, block, inpattern, outpattern, levdist,
-                      file = sfileINOUT, sep = ",")
-                    clean(bgColor)
-                    stayHere = 0
-                    return
+        handleEvents()
+
+        if exitfunc == 1:
+            return
 
         if not waitingForInput:
             # play the pattern
@@ -732,26 +699,10 @@ def playgame(stimuli):
 
     while patternum < len(stimuli): # main game loop
     
-        clickedButton = None        
-        for event in pygame.event.get(): # event handling loop
-            if event.type == KEYDOWN:
-                if event.key == K_LEFT:
-                    clickedButton = col1
-                if event.key == K_DOWN:
-                    clickedButton = col2
-                if event.key == K_RIGHT:
-                    clickedButton = col3
-                if event.key == K_UP:
-                    clickedButton = col4                    
-                if event.key == K_ESCAPE:
-                    terminate()
-                if event.key == K_r: # replay the current sequence
-                    waitingForInput = False
-                if event.key == K_SPACE:
-                    print(chain, snumber, block, inpattern, outpattern, levdist,
-                      file = sfileINOUT, sep = ",")
-                    clean(bgColor)
-                    return
+        handleEvents()
+
+        if exitfunc == 1:
+            return
 
         if not waitingForInput:
             # play the pattern
@@ -858,6 +809,7 @@ def main():
     
     questions1()
     getrefsubj()
+    symbset()
     stimfiles()
     outfiles()
     stimulidef()
