@@ -11,7 +11,7 @@ from shutil import copy2
 from itertools import permutations
 from pygame.locals import *
 from os.path import expanduser
-import csv, glob, contextlib, wave, re
+import csv, re
 
 #-------------------------------------------------------
 # Set directories
@@ -212,6 +212,12 @@ def symbset():
     """
     global possibs, keypermutation
     
+    # set initial state of random generator, for reproductibility.
+    # given that each chain restarts snumbers,
+    # create unique snumber by adding chain info
+    snumber3 = (int(chain)*100) + int(snumber)
+    random.seed(snumber3)
+    
     # Set of symbols 
     symb1 = 1
     symb2 = 2
@@ -226,7 +232,7 @@ def symbset():
     # each subject sets a unique random generator
     keypermutation = list(random.sample(keypermutationList, 1)[0])
     # reorder symbol set
-    possibs = [possibs[i] for i in keypermutation]
+    possibs = [possibs[i] for i in keypermutation]    
 
 def handleEvents():
     """ handle events entered by user.
@@ -315,12 +321,6 @@ def getrefsubj():
         subjList.append(isubjN)
     # define current snumber as lastSubject + 1
     snumber = str(max(subjList)+1)
-    
-    # set initial state of random generator, for reproductibility.
-    # given that each chain restarts snumbers,
-    # create unique snumber by adding chain info
-    snumber3 = (int(chain)*100) + int(snumber)
-    random.seed(snumber3)
 
     # define the reference subject, the output of which will be used as
     # the input for the current subject.
@@ -487,7 +487,6 @@ def training1():
     instr()
     
     # Initialize some variables for a new game
-    pattern = [] # stores the pattern of colors
     patternum = 0
     currentStep = 0 # the color the player must push next
     lastClickTime = 0 # timestamp of the player's last button push 
@@ -597,7 +596,7 @@ def playtrain(stimuli):
     """ Subject is asked to reproduce patterns.
     Do not present new pattern until current one correctly answered.
     """
-    global FPSCLOCK, levdist, patternum, stayHere, waitingForInput
+    global FPSCLOCK, levdist, patternum, stayHere, waitingForInput, outpattern
     
     instr()
     
@@ -680,7 +679,7 @@ def playgame(stimuli):
     """ Subject is asked to reproduce patterns.
     Do not check whether subject's response is correct.
     """
-    global FPSCLOCK, levdist, patternum
+    global FPSCLOCK, levdist, patternum, outpattern
     
     instr()
     
@@ -827,7 +826,6 @@ def main():
     DISPLAYSTRF = pygame.display.set_mode((screenRect.width, screenRect.height))
 #    DISPLAYSTRF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     pygame.display.set_caption('HCH 1.1')
-    cueFont = pygame.font.SysFont('arial', 50)
     instrFont = pygame.font.SysFont('arial', 32)
     pygame.mouse.set_visible(False)
     
