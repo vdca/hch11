@@ -346,11 +346,15 @@ def stimfiles():
     
     # for each sequence, get the block info.
     # only select those from the appropriate block.
-    # sequences are read as strings; convert them to integers
+    # sequences are read as strings; convert them to integers.
     trialList = []
     for i in range(0, len(trials)):
         if 'block2' in trials[i][2]:
             trialList.append(map(int, trials[i][4]))
+    # filter out too-short sequences; otherwise, participant enters an endless loop
+    # where a too-short sequence is asked, but the answer is considered too-short
+    # and repeated endlessly.
+    trialList = [i for i in trialList if len(i) > 6]
 
     # read training sequences
     trainingFile = responsedir1 + 'hch11_training4.txt'    
