@@ -1,5 +1,0 @@
-1,2,training1,,13421342,
-1,2,training2,13,13,
-1,2,training2,,,
-1,2,block1,,,
-1,2,block2,,,

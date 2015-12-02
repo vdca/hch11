@@ -871,8 +871,8 @@ def main():
     
     DISPLAYSTRF = pygame.display.set_mode([0,0],FULLSCREEN | DOUBLEBUF)
     screenRect = DISPLAYSTRF.get_rect()
-    DISPLAYSTRF = pygame.display.set_mode((screenRect.width, screenRect.height))
-#    DISPLAYSTRF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+    # DISPLAYSTRF = pygame.display.set_mode((screenRect.width, screenRect.height))
+    # DISPLAYSTRF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     pygame.display.set_caption('HCH 1.1')
     instrFont = pygame.font.SysFont('arial', 32)
     pygame.mouse.set_visible(False)
