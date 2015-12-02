@@ -1,0 +1,3 @@
+subjectID,block,seqID,itemID,button,relRT
+6,training2,1,0,1,1.4066696167e-05
+6,training2,1,0,3,0.600230932236
