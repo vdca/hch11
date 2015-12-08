@@ -357,7 +357,7 @@ def stimfiles():
     trialList = [i for i in trialList if len(i) > 6]
 
     # read training sequences
-    trainingFile = responsedir1 + 'hch11_training4.txt'    
+    trainingFile = responsedir1 + 'hch11_training.txt'    
     with open(trainingFile) as f:
         trainSeq = f.read().splitlines()
 
@@ -389,13 +389,13 @@ def questions1():
     global phase, stim_set, refsubj, chain
     
     phase = raw_input("\n\nPhase of experiment (test, pilot, chains): ")
-    stim_set = int(raw_input("Set of stimuli (0 = nonvocal; 6 = vocal): "))
+    # stim_set = int(raw_input("Set of stimuli (0 = nonvocal; 6 = vocal): "))
     chain = raw_input("Diffusion chain number: ")
     refsubj = raw_input("Reference subject (leave empty if reference subject is previous subject): ")
     
     # defaults
     # phase = 'pilot'
-    # stim_set = 0
+    stim_set = 6
     # chain = '1'
     # refsubj = '0'    
     
@@ -654,6 +654,10 @@ def playtrain(stimuli):
     currentStep = 0 # the color the player must push next
     lastClickTime = 0 # timestamp of the player's last button push
     levdist = ""
+    
+    # randomise the sequences within the block
+    random.shuffle(stimuli)    
+    
     # when False, the pattern is playing.
     # when True, waiting for the player to click a colored button:
     waitingForInput = False
@@ -783,8 +787,14 @@ def playgame(stimuli):
                       
             # if entered sequence is too short, ask sequence at random later point    
             elif (7 > currentStep > 0 and time.time() - TIMEOUT > lastClickTime):
-                levdist = None
-                print(chain, snumber, block, inpattern, outpattern, levdist,
+                # calculate score
+                longpattern = inpattern
+                if len(outpattern) > len(inpattern): longpattern = outpattern
+                levdist = 100 * (1 - (float(levenshtein(outpattern, inpattern)) / len(longpattern)))
+                levdist = int(levdist)
+                # trial is dismissed; don't record score
+                levdist2 = None
+                print(chain, snumber, block, inpattern, outpattern, levdist2,
                       file = sfileINOUT, sep = ",")
                 # generate random future position for too-short sequence
                 futurePosition = random.randint(patternum+1, len(stimuli)+1)
@@ -795,7 +805,8 @@ def playgame(stimuli):
                 waitingForInput = False
                 currentStep = 0
                 clean(bgColor)
-                infodisp("That was short!", 1000)
+                infodisp(str(levdist) + " % correct!", 1000)
+                # infodisp("That was short!", 1000)
                 
             # if entered sequence is long enough and time is out
             elif (currentStep != 0 and time.time() - TIMEOUT > lastClickTime):
@@ -871,7 +882,7 @@ def main():
     
     DISPLAYSTRF = pygame.display.set_mode([0,0],FULLSCREEN | DOUBLEBUF)
     screenRect = DISPLAYSTRF.get_rect()
-    # DISPLAYSTRF = pygame.display.set_mode((screenRect.width, screenRect.height))
+    DISPLAYSTRF = pygame.display.set_mode((screenRect.width, screenRect.height))
     # DISPLAYSTRF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     pygame.display.set_caption('HCH 1.1')
     instrFont = pygame.font.SysFont('arial', 32)
