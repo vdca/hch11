@@ -470,28 +470,27 @@ def questions3():
     if os.path.isfile(slistfile) == 0:
         slist = open(slistfile, 'a')
         print('date', 'phase', 'stimuliSet', 'chain', 'subjectID', 'keyPermutation',
-        'challenge', 'fun', 'motifs', 'strategies', 'comments', sep = '\t', file = slist)
+        'challenge', 'motifs', 'strategies', 'comments', sep = '\t', file = slist)
     else:
         slist = open(slistfile, 'a')
     
     print("\n\n" +
-    "Answering some (5) feedback questions would be very helpful." +
+    "Answering some (4) feedback questions would be very helpful." +
     "\n\n")
     
     testdate = time.strftime("%Y%m%d_%H%M")
     
     schallenge = raw_input ("How challenging did you find the task? From 1 (very easy) to 4 (very hard): ")
-    sfun = raw_input ("Using the same scale; how much fun did you have? ")
     smotifs = raw_input ("Is there any short combination of syllables which you felt appeared particularly often? ")
     strategies = raw_input ("Did you follow any specific strategy to remember the sequences? ")
-    scomments = raw_input("Any further comments? ")
+    scomments = raw_input("Any further comments? In your opinion, what was the experiment about? ")
     
     print("\n\n" +
     "--- End of the experiment ---" +
     "\n\n")
     
     subjectInfo = [testdate, phase, stim_set, chain, snumber, stimlabels2,
-                   schallenge, sfun, smotifs, strategies, scomments]
+                   schallenge, smotifs, strategies, scomments]
     # convert each element to a string
     sinfotxt = []
     for i in subjectInfo: sinfotxt.append(str(i))
@@ -634,7 +633,8 @@ def endExp():
     global testua
     
     testua = ["That was it!",
-    "Thank you very much for your help."]
+    "Thank you very much for your help.",
+    "You can now press the spacebar and answer a couple of feedback questions"]
     
     instr()
     
