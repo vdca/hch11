@@ -139,7 +139,10 @@ def instr():
     global testua
     clean(bgColor)
     
-    textrect = DISPLAYSTRF.get_rect()
+    screenRect = DISPLAYSTRF.get_rect()
+    screenRect.width = 1600; screenRect.height = 900
+    textrect = screenRect
+    
     margin = 150
     textrect.left = textrect.left + margin
     textrect.top = textrect.top + margin
@@ -200,7 +203,6 @@ def levenshtein(a,b):
 def drawRec():
     """ Display a microphone symbol when waiting for participant's input
     """
-    global screenRect
     screenRect = DISPLAYSTRF.get_rect()
     recIcon = pygame.image.load('stimuli/icons/mic1.png')
     iconRect = recIcon.get_rect()
@@ -210,7 +212,7 @@ def drawRec():
 def symbset():
     """ set of possible symbols, and subject-specific key-symbol mapping
     """
-    global possibs, keypermutation
+    global possibs, keypermutation, snumber3
     
     # set initial state of random generator, for reproductibility.
     # given that each chain restarts snumbers,
@@ -256,7 +258,7 @@ def handleEvents():
                 terminate()
             if event.key == K_r: # replay the current sequence
                 waitingForInput = False
-            if event.key == K_SPACE:
+            if event.key == K_a:
                 print(chain, snumber, block, inpattern, outpattern, levdist,
                   file = sfileINOUT, sep = ",")
                 clean(bgColor)
@@ -656,6 +658,7 @@ def playtrain(stimuli):
     levdist = ""
     
     # randomise the sequences within the block
+    random.seed(snumber3)
     random.shuffle(stimuli)    
     
     # when False, the pattern is playing.
@@ -742,6 +745,7 @@ def playgame(stimuli):
     lastClickTime = 0 # timestamp of the player's last button push
     
     # randomise the sequences within the block
+    random.seed(snumber3)
     random.shuffle(stimuli)
     
     # when False, the pattern is playing.
@@ -880,10 +884,13 @@ def main():
     
     FPSCLOCK = pygame.time.Clock()
     
-    DISPLAYSTRF = pygame.display.set_mode([0,0],FULLSCREEN | DOUBLEBUF)
+    DISPLAYSTRF = pygame.display.set_mode([0,0], FULLSCREEN | DOUBLEBUF)
     screenRect = DISPLAYSTRF.get_rect()
+    # print(str(screenRect.width)); print(str(screenRect.height))
+    screenRect.width = 1600; screenRect.height = 900
     DISPLAYSTRF = pygame.display.set_mode((screenRect.width, screenRect.height))
     # DISPLAYSTRF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+    
     pygame.display.set_caption('HCH 1.1')
     instrFont = pygame.font.SysFont('arial', 32)
     pygame.mouse.set_visible(False)
