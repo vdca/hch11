@@ -636,7 +636,9 @@ def endExp():
     
     testua = ["That was it!",
     "Thank you very much for your help.",
-    "You can now press the spacebar and answer a couple of feedback questions"]
+    "You can now press the spacebar and answer a couple of feedback questions.",
+    "",
+    "Once you are done with those questions, you will be asked to complete a final short task."]
     
     instr()
     
