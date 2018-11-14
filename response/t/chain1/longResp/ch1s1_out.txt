@@ -1,0 +1,8 @@
+subjectID,block,seqID,itemID,button,relRT
+1,training1,1,1,3,3.54515314102
+1,training1,1,2,1,5.20271611214
+1,training1,1,3,4,5.7310090065
+1,training1,1,4,2,6.22569298744
+1,training1,1,5,4,11.520619154
+1,training1,1,6,1,13.408862114
+1,training1,1,7,3,13.9364089966
